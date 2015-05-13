@@ -4,7 +4,6 @@
     "homepage": "http://app.qcloud.com/",
     "license": "MIT",
     "description": "php sdk for app.qcloud.com image service",
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0"
     },
