@@ -1,7 +1,6 @@
 {
     "name": "tencentyun/php-sdk",
-    "type": "library",
-    "keywords": ["tencentyun", "qcloud", "sdk", "cloud"],
+    "keywords": ["tencentyun", "qcloud", "sdk"],
     "homepage": "http://app.qcloud.com/",
     "license": "MIT",
     "description": "php sdk for app.qcloud.com image service",
