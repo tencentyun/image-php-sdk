@@ -1,0 +1,7 @@
+{
+    "name": "tencentyun/php-sdk",
+    "description": "php sdk for app.qcloud.com image service",
+    "require": {
+        "php": ">=5.3.0",
+    }
+}
