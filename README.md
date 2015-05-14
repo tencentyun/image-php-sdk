@@ -4,7 +4,7 @@ php sdk for [腾讯云万象图片服务](http://app.qcloud.com/image.html)
 ## 安装
 
 ### 使用composer
-php composer.phar update tencentyun/php-sdk
+php composer.phar require tencentyun/php-sdk
 
 ### 下载源码
 从github下载源码装入到您的程序中，并加载Tencentyun目录下的文件
