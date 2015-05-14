@@ -15,6 +15,8 @@ if (0 === $uploadRet['code']) {
 
     $delRet = Image::del($fileid);
     var_dump($delRet);
+} else {
+    var_dump($uploadRet);
 }
 
 
