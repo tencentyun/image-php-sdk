@@ -5,7 +5,7 @@ require('./vendor/autoload.php');
 use Tencentyun\Image;
 
 // 上传
-$uploadRet = Image::upload('./154631959.jpg');
+$uploadRet = Image::upload('/tmp/amazon.jpg');
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
 
