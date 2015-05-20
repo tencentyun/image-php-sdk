@@ -20,7 +20,7 @@ class Image
 	public static function upload($filePath, $userid = 0, $magicContext = '') {
 
 		if (!file_exists($filePath)) {
-			return array('httpcode' => 0, 'code' => self::IMAGE_FILE_NOT_EXISTS, 'message' => 'file not exists', 'data' => array());
+			return array('httpcode' => 0, 'code' => self::IMAGE_FILE_NOT_EXISTS, 'message' => 'file '.$filePath.' not exists', 'data' => array());
 		}
 
 		$expired = time() + self::EXPIRED_SECONDS;
