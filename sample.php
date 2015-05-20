@@ -1,6 +1,8 @@
 <?php
 
-require('./vendor/autoload.php');
+//require('./vendor/autoload.php');
+
+require('./include.php');
 
 use Tencentyun\Image;
 
