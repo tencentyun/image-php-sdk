@@ -46,7 +46,7 @@ class Http
             curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER,true);
             curl_setopt($curlHandle, CURLOPT_CAINFO, $rq['cert']);
             curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST,2);
-            isset($rq['ssl_version']) {
+            if (isset($rq['ssl_version'])) {
                 curl_setopt($curlHandle, CURLOPT_SSLVERSION, $rq['ssl_version']);
             } else {
                 curl_setopt($curlHandle, CURLOPT_SSLVERSION, 4);
@@ -54,7 +54,7 @@ class Http
         }else if( $ssl ){
             curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER,false);   //true any ca
             curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST,1);       //check only host
-            isset($rq['ssl_version']) {
+            if (isset($rq['ssl_version'])) {
                 curl_setopt($curlHandle, CURLOPT_SSLVERSION, $rq['ssl_version']);
             } else {
                 curl_setopt($curlHandle, CURLOPT_SSLVERSION, 4);
