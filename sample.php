@@ -26,6 +26,11 @@ if (0 === $uploadRet['code']) {
     $signedUrl = $downloadUrl . '?sign=' . $sign;
     var_dump($signedUrl);
 
+    //生成新的上传签名
+    $expired = time() + 999;
+    $sign = Auth::appSign('http://web.image.myqcloud.com/photos/v1/0/', $expired);
+    var_dump($sign);
+
     $delRet = Image::del($fileid);
     var_dump($delRet);
 } else {
