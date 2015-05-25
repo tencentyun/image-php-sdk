@@ -27,15 +27,16 @@ class Auth
             return self::AUTH_URL_FORMAT_ERROR;
         }
 
-        $cate   = $urlInfo['cate'];
-        $ver    = $urlInfo['ver'];
+        $cate   = isset($urlInfo['cate']) ? $urlInfo['cate'] : '';
+        $ver    = isset($urlInfo['ver']) ? $urlInfo['ver'] : '';
         $appid  = $urlInfo['appid'];
         $userid = $urlInfo['userid'];
         $oper   = isset($urlInfo['oper']) ? $urlInfo['oper'] : '';
         $fileid = isset($urlInfo['fileid']) ? $urlInfo['fileid'] : '';
+        $style = isset($urlInfo['style']) ? $urlInfo['style'] : '';
 
         $onceOpers = array('del', 'copy');
-        if ($oper && in_array($oper, $onceOpers)) {
+        if ($fileid || ($oper && in_array($oper, $onceOpers))) {
             $expired = 0;
         }
         
@@ -64,38 +65,60 @@ class Auth
      */
 	public static function getInfoFromUrl($url) {
         $args = parse_url($url);
-        if (isset($args['path'])) {
-            $parts = explode('/', $args['path']);
-            switch (count($parts)) {
-                case 5:
-                    $cate = $parts[1];
-                    $ver = $parts[2];
-                    $appid = $parts[3];
-                    $userid = $parts[4];
-                    return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid);
-                break;
-                case 6:
-                    $cate = $parts[1];
-                    $ver = $parts[2];
-                    $appid = $parts[3];
-                    $userid = $parts[4];
-                    $fileid = $parts[5];
-                    return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid, 'fileid' => $fileid);
-                break;
-                case 7:
-                    $cate = $parts[1];
-                    $ver = $parts[2];
-                    $appid = $parts[3];
-                    $userid = $parts[4];
-                    $fileid = $parts[5];
-                    $oper = $parts[6];
-                    return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid, 'fileid' => $fileid, 'oper' => $oper);
-                break;
-                default:
-                    return array();
+        $endPointArgs = parse_url(Conf::API_IMAGE_END_POINT);
+        // 非下载url
+        if ($args['host'] == $endPointArgs['host']) {
+            if (isset($args['path'])) {
+                $parts = explode('/', $args['path']);
+                switch (count($parts)) {
+                    case 5:
+                        $cate = $parts[1];
+                        $ver = $parts[2];
+                        $appid = $parts[3];
+                        $userid = $parts[4];
+                        return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid);
+                    break;
+                    case 6:
+                        $cate = $parts[1];
+                        $ver = $parts[2];
+                        $appid = $parts[3];
+                        $userid = $parts[4];
+                        $fileid = $parts[5];
+                        return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid, 'fileid' => $fileid);
+                    break;
+                    case 7:
+                        $cate = $parts[1];
+                        $ver = $parts[2];
+                        $appid = $parts[3];
+                        $userid = $parts[4];
+                        $fileid = $parts[5];
+                        $oper = $parts[6];
+                        return array('cate' => $cate, 'ver' => $ver, 'appid' => $appid, 'userid' => $userid, 'fileid' => $fileid, 'oper' => $oper);
+                    break;
+                    default:
+                        return array();
+                }
+            } else {
+                return array();
             }
         } else {
-            return array();
+            // 下载url
+            if (isset($args['path'])) {
+                $parts = explode('/', $args['path']);
+                switch (count($parts)) {
+                    case 5:
+                        $appid = $parts[1];
+                        $userid = $parts[2];
+                        $fileid = $parts[3];
+                        $style = $parts[4];
+                        return array('appid' => $appid, 'userid' => $userid, 'fileid' => $fileid, 'style' => $style);
+                    break;
+                    default:
+                        return array();
+                }
+            } else {
+                return array();
+            }
         }
 	}
 }
