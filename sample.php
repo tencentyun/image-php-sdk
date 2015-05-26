@@ -28,7 +28,7 @@ if (0 === $uploadRet['code']) {
 
     //生成新的上传签名
     $expired = time() + 999;
-    $sign = Auth::appSign('http://web.image.myqcloud.com/photos/v1/0/', $expired);
+    $sign = Auth::appSign('http://web.image.myqcloud.com/photos/v1/200679/0/', $expired);
     var_dump($sign);
 
     $delRet = Image::del($fileid);
