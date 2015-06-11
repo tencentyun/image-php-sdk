@@ -74,4 +74,62 @@ if (0 === $uploadRet['code']) {
 } else {
     var_dump($uploadRet);
 }
+
+
+## 视频上传、查询、删除程序示例1（使用composer安装后生成的autoload）
+```php
+require('./vendor/autoload.php');
+
+use Tencentyun\Video;
+
+// 上传
+$uploadRet = Video::upload('./154631959.jpg');
+if (0 === $uploadRet['code']) {
+    $fileid = $uploadRet['data']['fileid'];
+
+    // 查询管理信息
+    $statRet = Video::stat($fileid);
+    var_dump($statRet);
+
+    $delRet = Video::del($fileid);
+    var_dump($delRet);
+}
+```
+
+## 视频上传、查询、删除程序示例2（使用tencentyun提供的include.php）
+```php
+<?php
+
+//require('./vendor/autoload.php');
+
+require('./include.php');
+
+use Tencentyun\Video;
+use Tencentyun\Auth;
+
+// 上传
+$uploadRet = Video::upload('/tmp/amazon.jpg');
+if (0 === $uploadRet['code']) {
+    $fileid = $uploadRet['data']['fileid'];
+
+    // 查询管理信息
+    $statRet = Video::stat($fileid);
+    var_dump($statRet);
+
+    // 生成私密下载url
+    $downloadUrl = $copyRet['data']['downloadUrl'];
+    $sign = Auth::appSign($downloadUrl, 0);
+    $signedUrl = $downloadUrl . '?sign=' . $sign;
+    var_dump($signedUrl);
+
+    //生成新的上传签名
+    $expired = time() + 999;
+    $sign = Auth::appSign('http://web.video.myqcloud.com/videos/v1/200679/0/', $expired);
+    var_dump($sign);
+
+    $delRet = Video::del($fileid);
+    var_dump($delRet);
+} else {
+    var_dump($uploadRet);
+}
 ```
