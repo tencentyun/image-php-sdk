@@ -65,9 +65,10 @@ class Auth
      */
 	public static function getInfoFromUrl($url) {
         $args = parse_url($url);
-        $endPointArgs = parse_url(Conf::API_IMAGE_END_POINT);
+        $endPointArgs_image = parse_url(Conf::API_IMAGE_END_POINT);
+		$endPointArgs_video = parse_url(Conf::API_VIDEO_END_POINT);
         // 非下载url
-        if ($args['host'] == $endPointArgs['host']) {
+        if ($args['host'] == $endPointArgs_image['host'] || $args['host'] == $endPointArgs_video['host']) {
             if (isset($args['path'])) {
                 $parts = explode('/', $args['path']);
                 switch (count($parts)) {
