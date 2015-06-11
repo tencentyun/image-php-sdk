@@ -3,10 +3,12 @@ namespace Tencentyun;
 
 class Conf
 {
-    const PKG_VERSION = '1.0.*'; 
+    const PKG_VERSION = '1.2.0'; 
 
     const API_IMAGE_END_POINT = 'http://web.image.myqcloud.com/photos/v1/';
 
+	const API_VIDEO_END_POINT = 'http://web.video.myqcloud.com/videos/v1/';
+		
     const APPID = '200679';
 
     const SECRET_ID = 'AKIDoleG4e6U0j6EVQcjWXxzSO2Vv7Hqlgp2';
