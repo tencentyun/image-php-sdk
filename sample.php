@@ -6,9 +6,10 @@ require('./include.php');
 
 use Tencentyun\Image;
 use Tencentyun\Auth;
+use Tencentyun\Video;
 
-// 上传
-$uploadRet = Image::upload('/tmp/amazon.jpg');
+// 上传图片
+$uploadRet = Image::upload('test.jpg');
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
 
@@ -38,6 +39,33 @@ if (0 === $uploadRet['code']) {
 }
 
 
+// 上传视频
+$userid = '123';
+$uploadRet = Video::upload_slice('test.mp4',$userid);
+
+if (0 === $uploadRet['code']) {
+
+    $fileid = $uploadRet['data']['fileid'];
+
+    // 查询管理信息
+    $statRet = Video::stat($fileid,$userid);
+    var_dump($statRet);
+
+	
+    //生成新的多次有效签名
+    $expired = time() + 999;
+    $sign = Auth::appSign_more($expired,$userid);
+    var_dump($sign);
+
+    //生成新的单次有效签名
+    $sign = Auth::appSign_once($fileid,$userid);
+    var_dump($sign);
+	
+    $delRet = Video::del($fileid,$userid);
+    var_dump($delRet);
+} else {
+    var_dump($uploadRet);
+}
 
 
 

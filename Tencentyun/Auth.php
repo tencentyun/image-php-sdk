@@ -8,7 +8,8 @@ class Auth
     const AUTH_SECRET_ID_KEY_ERROR = -2;
 
     /**
-     * 签名函数
+     * 签名函数（上传、下载会生成多次有效签名，复制删除资源会生成单次有效签名）
+	 * 如果需要针对下载生成单次有效签名，请使用函数appSign_once
      * @param  string $url     请求url
      * @param  int $expired    过期时间
      * @return string          签名
@@ -58,6 +59,74 @@ class Auth
         return $sign;
     }
 
+	 /**
+     * 生成单次有效签名函数（用于复制、删除和下载指定fileid资源，使用一次即失效）
+     * @param  string $fileid     文件唯一标识符
+	 * @param  string $userid  开发者账号体系下的userid，没有请使用默认值0
+     * @return string          签名
+     */
+    public static function appSign_once($fileid, $userid = '0') {
+
+        $secretId = Conf::SECRET_ID;
+        $secretKey = Conf::SECRET_KEY;
+		$appid = Conf::APPID;
+		
+        if (empty($secretId) || empty($secretKey) || empty($appid)) {
+            return self::AUTH_SECRET_ID_KEY_ERROR;
+        }
+        
+        $puserid = '';
+        if (!empty($userid)) {
+            if (strlen($userid) > 64) {
+                return self::AUTH_URL_FORMAT_ERROR;
+            }
+            $puserid = $userid;
+        }
+                    
+        $now = time();    
+        $rdm = rand();
+
+        $plainText = 'a='.$appid.'&k='.$secretId.'&e=0'.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f='.$fileid;
+        $bin = hash_hmac("SHA1", $plainText, $secretKey, true);
+        $bin = $bin.$plainText;        
+        $sign = base64_encode($bin);        
+        return $sign;
+    }
+	
+	/**
+     * 生成多次有效签名函数（用于上传和下载资源，有效期内可重复对不同资源使用）
+     * @param  int $expired    过期时间
+	 * @param  string $userid  开发者账号体系下的userid，没有请使用默认值0
+     * @return string          签名
+     */
+    public static function appSign_more($expired,$userid = '0') {
+
+        $secretId = Conf::SECRET_ID;
+        $secretKey = Conf::SECRET_KEY;
+		$appid = Conf::APPID;
+		
+        if (empty($secretId) || empty($secretKey) || empty($appid)) {
+            return self::AUTH_SECRET_ID_KEY_ERROR;
+        }
+        
+        $puserid = '';
+        if (!empty($userid)) {
+            if (strlen($userid) > 64) {
+                return self::AUTH_URL_FORMAT_ERROR;
+            }
+            $puserid = $userid;
+        }
+                    
+        $now = time();    
+        $rdm = rand();
+
+        $plainText = 'a='.$appid.'&k='.$secretId.'&e='.$expired.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f=';
+        $bin = hash_hmac("SHA1", $plainText, $secretKey, true);
+        $bin = $bin.$plainText;        
+        $sign = base64_encode($bin);        
+        return $sign;
+    }
+	
     /**
      * 获取url信息
      * @param  string $url 请求url
