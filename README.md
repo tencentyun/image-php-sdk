@@ -83,8 +83,8 @@ require('./vendor/autoload.php');
 use Tencentyun\Video;
 
 // 上传
-$uploadRet = Video::upload('./154631959.jpg');
-//$uploadRet = Video::upload_slice('./154631959.jpg');  //分片上传，适用于较大文件
+$uploadRet = Video::upload('./test.mp4');
+//$uploadRet = Video::upload_slice('./test.mp4);  //分片上传，适用于较大文件
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
 
@@ -109,7 +109,8 @@ use Tencentyun\Video;
 use Tencentyun\Auth;
 
 // 上传
-$uploadRet = Video::upload('/tmp/amazon.jpg');
+$uploadRet = Video::upload('/tmp/test.mp4);
+//$uploadRet = Video::upload_slice('/tmp/test.mp4);  //分片上传，适用于较大文件
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
 
