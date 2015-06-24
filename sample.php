@@ -41,7 +41,8 @@ if (0 === $uploadRet['code']) {
 
 // 上传视频
 $userid = '123';
-$uploadRet = Video::upload_slice('test.mp4',$userid);
+$uploadRet = Video::upload('test.mp4',$userid);
+//$uploadRet = Video::upload_slice('test.mp4',$userid);		//分片上传，适用于较大文件
 
 if (0 === $uploadRet['code']) {
 
