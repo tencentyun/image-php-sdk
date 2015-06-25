@@ -22,9 +22,10 @@ class Image
      * @param  string  $filePath     本地文件路径
      * @param  integer $userid       用户自定义分类
      * @param  string  $magicContext 自定义回调参数
+     * @param  array   $params       参数数组
      * @return [type]                [description]
      */
-	public static function upload($filePath, $userid = 0, $magicContext = '') {
+	public static function upload($filePath, $userid = 0, $magicContext = '', $params = array()) {
 
         $filePath = realpath($filePath);
 
@@ -35,6 +36,12 @@ class Image
 		$expired = time() + self::EXPIRED_SECONDS;
 		$url = self::generateResUrl($userid);
 		$sign = Auth::appSign($url, $expired);
+
+        // add get params to url
+        if (isset($params['get']) && is_array($params['get'])) {
+            $queryStr = http_build_query($params['get']);
+            $url .= '?'.$queryStr;  
+        }
 
 		$data = array(
             'FileContent' => '@'.$filePath,
@@ -58,8 +65,18 @@ class Image
 		$ret = json_decode($rsp, true);
 		if ($ret) {
 			if (0 === $ret['code']) {
-				return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'], 
-					'data' => array('url' => $ret['data']['url'], 'downloadUrl' => $ret['data']['download_url'], 'fileid' => $ret['data']['fileid']));
+                $data = array(
+                    'url' => $ret['data']['url'], 
+                    'downloadUrl' => $ret['data']['download_url'], 
+                    'fileid' => $ret['data']['fileid'],
+                );
+                if (array_key_exists('is_fuzzy', $ret['data'])) {
+                    $data['isFuzzy'] = $ret['data']['is_fuzzy'];
+                }
+                if (array_key_exists('is_food', $ret['data'])) {
+                    $data['isFood'] = $ret['data']['is_food'];
+                }
+				return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'], 'data' => $data);
 			} else {
 				return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'], 'data' => array());
 			}

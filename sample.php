@@ -9,7 +9,7 @@ use Tencentyun\Auth;
 use Tencentyun\Video;
 
 // 上传图片
-$uploadRet = Image::upload('c:/pic/0.jpg');
+$uploadRet = Image::upload('/tmp/0f0000vvCL2tnMfkFprLPf.jpg');
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
 
@@ -38,6 +38,20 @@ if (0 === $uploadRet['code']) {
     var_dump($uploadRet);
 }
 
+// 上传指定进行优图识别  fuzzy（模糊识别），food(美食识别）
+// 如果要支持模糊识别，url?analyze=fuzzy
+// 如果要同时支持模糊识别和美食识别，url?analyze=fuzzy.food
+// 返回数据中
+// "isFuzzy" 1 模糊 0 清晰
+// "isFood" 1 美食 0 不是
+$userid = 0;
+$magicContext = '';
+$gets = array(
+    'analyze' => 'fuzzy.food'
+);
+$uploadRet = Image::upload('/tmp/20150624100808134034653.jpg',$userid,$magicContext,array('get'=>$gets));
+var_dump($uploadRet);
+
 
 // 上传视频
 $uploadRet = Video::upload('c:/pic/0.jpg');
@@ -58,7 +72,6 @@ if (0 === $uploadRet['code']) {
 } else {
     var_dump($uploadRet);
 }
-
 
 
 
