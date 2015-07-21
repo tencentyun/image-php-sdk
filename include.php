@@ -4,5 +4,7 @@
 spl_autoload_register(function($class){
     $dir = dirname(__FILE__);
     $class = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-    include($dir.DIRECTORY_SEPARATOR.$class); 
+    if (0 === strpos($class, 'Tencentyun')) {
+    	include($dir.DIRECTORY_SEPARATOR.$class); 
+    }
 });
