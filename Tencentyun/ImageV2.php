@@ -10,7 +10,7 @@ class ImageV2
     const IMAGE_FILE_NOT_EXISTS = -1;
     const IMAGE_NETWORK_ERROR = -2;
     const IMAGE_PARAMS_ERROR = -3;
-                    
+
     /**
      * 上传文件
      * @param  string  $filePath     本地文件路径
@@ -22,7 +22,7 @@ class ImageV2
      */
     public static function upload($filePath, $bucket, $fileid='', $userid=0, $magicContext = '', $params = array()) {
 
-        $filePath = realpath($filePath);
+        // $filePath = realpath($filePath);
 
         if (!file_exists($filePath)) {
             return array('httpcode' => 0, 'code' => self::IMAGE_FILE_NOT_EXISTS, 'message' => 'file '.$filePath.' not exists', 'data' => array());
@@ -35,7 +35,7 @@ class ImageV2
         // add get params to url
         if (isset($params['get']) && is_array($params['get'])) {
             $queryStr = http_build_query($params['get']);
-            $url .= '?'.$queryStr;  
+            $url .= '?'.$queryStr;
         }
 
         $data = array(
@@ -61,8 +61,8 @@ class ImageV2
         if ($ret) {
             if (0 === $ret['code']) {
                 $data = array(
-                    'url' => $ret['data']['url'], 
-                    'downloadUrl' => $ret['data']['download_url'], 
+                    'url' => $ret['data']['url'],
+                    'downloadUrl' => $ret['data']['download_url'],
                     'fileid' => $ret['data']['fileid'],
                 );
                 if (array_key_exists('is_fuzzy', $ret['data'])) {
@@ -112,10 +112,10 @@ class ImageV2
         if ($ret) {
             if (0 === $ret['code']) {
                 $retData = $ret['data'];
-                return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'], 
+                return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'],
                     'data' => array(
-                        'downloadUrl' => isset($retData['file_url']) ? $retData['file_url'] : '', 
-                        'fileid' => isset($retData['file_fileid']) ? $retData['file_fileid'] : '', 
+                        'downloadUrl' => isset($retData['file_url']) ? $retData['file_url'] : '',
+                        'fileid' => isset($retData['file_fileid']) ? $retData['file_fileid'] : '',
                         'uploadTime' => isset($retData['file_upload_time']) ? $retData['file_upload_time'] : '',
                         'size' => isset($retData['file_size']) ? $retData['file_size'] : '',
                         'md5' => isset($retData['file_md5']) ? $retData['file_md5'] : '',
@@ -155,11 +155,11 @@ class ImageV2
         if ($ret) {
             if (0 === $ret['code']) {
                 return array(
-                    'httpcode' => $info['http_code'], 
-                    'code' => $ret['code'], 
-                    'message' => $ret['message'], 
+                    'httpcode' => $info['http_code'],
+                    'code' => $ret['code'],
+                    'message' => $ret['message'],
                     'data' => array(
-                        'url' => $ret['data']['url'], 
+                        'url' => $ret['data']['url'],
                         'downloadUrl' => $ret['data']['download_url'],
                     )
                 );
@@ -170,7 +170,7 @@ class ImageV2
             return array('httpcode' => $info['http_code'], 'code' => self::IMAGE_NETWORK_ERROR, 'message' => 'network error', 'data' => array());
         }
     }
-        
+
     public static function del($bucket, $fileid, $userid=0)    {
         if (!$fileid) {
             return array('httpcode' => 0, 'code' => self::IMAGE_PARAMS_ERROR, 'message' => 'params error', 'data' => array());
@@ -214,7 +214,7 @@ class ImageV2
             return Conf::API_IMAGE_END_POINT_V2 . Conf::APPID . '/' . $bucket . '/' . $userid;
         }
     }
-        
+
 }
 
 

@@ -16,7 +16,7 @@ class Video
 	const VIDEO_FILE_NOT_EXISTS = -1;
 	const VIDEO_NETWORK_ERROR = -2;
 	const VIDEO_PARAMS_ERROR = -3;
-	
+
     /**
      * 上传文件
      * @param  string  $filePath     本地文件路径
@@ -28,7 +28,7 @@ class Video
      */
 	public static function upload($filePath, $userid = 0,$title = '', $desc = '', $magicContext = '') {
 
-        $filePath = realpath($filePath);
+        // $filePath = realpath($filePath);
 
 		if (!file_exists($filePath)) {
 			return array('httpcode' => 0, 'code' => self::VIDEO_FILE_NOT_EXISTS, 'message' => 'file '.$filePath.' not exists', 'data' => array());
@@ -50,7 +50,7 @@ class Video
 		if ($magicContext) {
         	$data['MagicContext'] = $magicContext;
         }
-		
+
         $req = array(
             'url' => $url,
             'method' => 'post',
@@ -68,32 +68,32 @@ class Video
 		if ($ret) {
 			if (0 === $ret['code']) {
 				return array(
-						'httpcode' => $info['http_code'], 
-						'code' => $ret['code'], 
-						'message' => $ret['message'], 
+						'httpcode' => $info['http_code'],
+						'code' => $ret['code'],
+						'message' => $ret['message'],
 						'data' => array(
-								'url' => $ret['data']['url'], 
-								'downloadUrl' => $ret['data']['download_url'], 'fileid' => $ret['data']['fileid'], 
+								'url' => $ret['data']['url'],
+								'downloadUrl' => $ret['data']['download_url'], 'fileid' => $ret['data']['fileid'],
 								'cover_url' => (isset($ret['data']['cover_url']) ? $ret['data']['cover_url'] : ""),
 								)
 							);
 			} else {
 				return array(
-					'httpcode' => $info['http_code'], 
-					'code' => $ret['code'], 
-					'message' => $ret['message'], 
+					'httpcode' => $info['http_code'],
+					'code' => $ret['code'],
+					'message' => $ret['message'],
 					'data' => array()
 				);
 			}
 		} else {
 			return array(
-					'httpcode' => $info['http_code'], 
-					'code' => self::VIDEO_NETWORK_ERROR, 
+					'httpcode' => $info['http_code'],
+					'code' => self::VIDEO_NETWORK_ERROR,
 					'message' => 'network error', 'data' => array()
 				);
 		}
 	}
-	
+
     /**
      * 分片上传文件
      * @param  string  $filePath     本地文件路径
@@ -120,7 +120,7 @@ class Video
 		$slice_size = isset($rsp['data']['slice_size']) ? (int)$rsp['data']['slice_size'] : 0;
 		$offset = isset($rsp['data']['offset']) ? (int)$rsp['data']['offset'] : 0;
 		$session = isset($rsp['data']['session']) ? $rsp['data']['session'] : '';
-		
+
 		$handle = fopen($filePath, "rb");
 		$file_size = filesize($filePath);
 		while($file_size > $offset)
@@ -143,7 +143,7 @@ class Video
 
 		return $ret;
 	}
-		
+
 	public static function stat($fileid, $userid = 0) {
 
 		if (!$fileid) {
@@ -169,10 +169,10 @@ class Video
 		if ($ret) {
 			if (0 === $ret['code']) {
 				$retData = $ret['data'];
-				return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'], 
+				return array('httpcode' => $info['http_code'], 'code' => $ret['code'], 'message' => $ret['message'],
 					'data' => array(
-						'downloadUrl' => isset($retData['file_url']) ? $retData['file_url'] : '', 
-						'fileid' => isset($retData['file_fileid']) ? $retData['file_fileid'] : '', 
+						'downloadUrl' => isset($retData['file_url']) ? $retData['file_url'] : '',
+						'fileid' => isset($retData['file_fileid']) ? $retData['file_fileid'] : '',
 						'uploadTime' => isset($retData['file_upload_time']) ? $retData['file_upload_time'] : '',
 						'size' => isset($retData['file_size']) ? $retData['file_size'] : '',
 						'sha' => isset($retData['file_sha']) ? $retData['file_sha'] : '',
@@ -235,7 +235,7 @@ class Video
 	        return Conf::API_VIDEO_END_POINT . Conf::APPID . '/' . $userid;
 	    }
 	}
-		
+
     /**
      * 分片上传文件,控制包/断点续传
      * @param  string  $filePath     本地文件路径
@@ -258,7 +258,7 @@ class Video
 		$url = self::generateResUrl($userid);
 		$sign = Auth::appSign($url, $expired);
 		$sha1file = sha1_file($filePath);
-		
+
 		$data = array(
             'FileSize' => filesize($filePath),
 			'op' => 'upload_slice',
@@ -296,16 +296,16 @@ class Video
 				return $ret;
 			} else {
 				return array(
-					'httpcode' => $info['http_code'], 
-					'code' => $ret['code'], 
-					'message' => $ret['message'], 
+					'httpcode' => $info['http_code'],
+					'code' => $ret['code'],
+					'message' => $ret['message'],
 					'data' => array()
 				);
 			}
 		} else {
 			return array(
-					'httpcode' => $info['http_code'], 
-					'code' => self::VIDEO_NETWORK_ERROR, 
+					'httpcode' => $info['http_code'],
+					'code' => self::VIDEO_NETWORK_ERROR,
 					'message' => 'network error', 'data' => array()
 				);
 		}
@@ -323,7 +323,7 @@ class Video
 		$expired = time() + self::EXPIRED_SECONDS;
 		$url = self::generateResUrl($userid);
 		$sign = Auth::appSign($url, $expired);
-		
+
 		$data = array(
             'FileContent' => $file_data,
 			'op' => 'upload_slice',
@@ -350,16 +350,16 @@ class Video
 				return $ret;
 			} else {
 				return array(
-					'httpcode' => $info['http_code'], 
-					'code' => $ret['code'], 
-					'message' => $ret['message'], 
+					'httpcode' => $info['http_code'],
+					'code' => $ret['code'],
+					'message' => $ret['message'],
 					'data' => array()
 				);
 			}
 		} else {
 			return array(
-					'httpcode' => $info['http_code'], 
-					'code' => self::VIDEO_NETWORK_ERROR, 
+					'httpcode' => $info['http_code'],
+					'code' => self::VIDEO_NETWORK_ERROR,
 					'message' => 'network error', 'data' => array()
 				);
 		}
