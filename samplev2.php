@@ -31,6 +31,12 @@ if (0 === $uploadRet['code']) {
     $signedUrl = $downloadUrl . '?sign=' . $sign;
     var_dump($signedUrl);
 
+    /*
+        // 生成单次签名-复制示例
+        $copyUrl = 'http://test1-10000002.image.myqcloud.com/test1-10000002/0/sample1436341553/copy';
+        $sign = Auth::appSignV2($copyUrl, 0);
+    */
+
     //生成新的上传签名
     $expired = time() + 999;
     $sign = Auth::appSignV2('http://test1-10000002.image.myqcloud.com/test1-10000002/0/sample1436341553/', $expired);
