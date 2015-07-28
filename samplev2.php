@@ -26,7 +26,8 @@ if (0 === $uploadRet['code']) {
     var_dump('copy', $copyRet);
 
     // 生成私密下载url
-    $sign = Auth::appSignV2($downloadUrl);
+    $expired = time() + 999;
+    $sign = Auth::appSignV2($downloadUrl, $expired);
     $signedUrl = $downloadUrl . '?sign=' . $sign;
     var_dump($signedUrl);
 
