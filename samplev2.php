@@ -31,7 +31,7 @@ if (0 === $uploadRet['code']) {
     $expired = time() + 999;
     $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
     $signedUrl = $downloadUrl . '?sign=' . $sign;
-    var_dump($signedUrl);
+    var_dump('downloadUrl:', $signedUrl);
 
     //生成新的单次签名, 必须绑定资源fileid，复制和删除必须使用，其他不能使用
     $fileid = $fileid.time().rand();  // 自定义文件名
