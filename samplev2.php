@@ -11,8 +11,7 @@ use Tencentyun\Video;
 // V2版本 带有空间和自定义文件名的示例
 // 上传图片
 $bucket = 'test2'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
-//$fileid = 'sample'.time();  // 自定义文件名
-$fileid = '/u/can/use/slash/in/fileid/'.time();
+$fileid = 'sample'.time();  // 自定义文件名
 $uploadRet = ImageV2::upload('/tmp/amazon.jpg', $bucket, $fileid);
 
 var_dump('upload',$uploadRet);
