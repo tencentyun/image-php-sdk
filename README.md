@@ -24,9 +24,11 @@ use Tencentyun\Video;
 
 // V2版本 带有空间和自定义文件名的示例
 // 上传图片
-$bucket = 'test1'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
+$bucket = 'test2'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
 $fileid = 'sample'.time();  // 自定义文件名
 $uploadRet = ImageV2::upload('/tmp/amazon.jpg', $bucket, $fileid);
+
+var_dump('upload',$uploadRet);
 
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
@@ -40,13 +42,21 @@ if (0 === $uploadRet['code']) {
     var_dump('copy', $copyRet);
 
     // 生成私密下载url
-    $sign = Auth::appSignV2($downloadUrl);
+    $expired = time() + 999;
+    $sign = Auth::getAppSignV2($fileid, $expired);
     $signedUrl = $downloadUrl . '?sign=' . $sign;
     var_dump($signedUrl);
 
-    //生成新的上传签名
+    //生成新的单次签名, 必须绑定资源fileid，复制和删除必须使用，其他不能使用
+    $fileid = $fileid.time().rand();  // 自定义文件名
+    $expired = 0;
+    $sign = Auth::getAppSignV2($fileid, $expired);
+    var_dump($sign);
+
+    //生成新的多次签名, 可以不绑定资源fileid
+    $fileid = '';
     $expired = time() + 999;
-    $sign = Auth::appSignV2('http://test1-10000002.image.myqcloud.com/test1-10000002/0/sample1436341553/', $expired);
+    $sign = Auth::getAppSignV2($fileid, $expired);
     var_dump($sign);
 
     //$delRet = ImageV2::del($bucket, $fileid);
@@ -54,21 +64,6 @@ if (0 === $uploadRet['code']) {
 } else {
     var_dump($uploadRet);
 }
-
-// 上传指定进行优图识别  fuzzy（模糊识别），food(美食识别）
-// 如果要支持模糊识别，url?analyze=fuzzy
-// 如果要同时支持模糊识别和美食识别，url?analyze=fuzzy.food
-// 返回数据中
-// "isFuzzy" 1 模糊 0 清晰
-// "isFood" 1 美食 0 不是
-$userid = 0;
-$magicContext = '';
-$gets = array(
-    'analyze' => 'fuzzy.food'
-);
-$fileid = 'sample'.time();
-$uploadRet = ImageV2::upload('/tmp/amazon.jpg', $bucket, $fileid, $userid, $magicContext, array('get'=>$gets));
-var_dump($uploadRet);
 
 ```
 
