@@ -20,13 +20,28 @@ class ImageV2
      * @param  array   $params       参数数组
      * @return [type]                [description]
      */
-    public static function upload($filePath, $bucket, $fileid='', $userid=0, $magicContext = '', $params = array()) {
-
-        // $filePath = realpath($filePath);
-
+    public static function upload($filePath, $bucket, $fileid = '', $userid = 0, $magicContext = '', $params = array()) {
         if (!file_exists($filePath)) {
             return array('httpcode' => 0, 'code' => self::IMAGE_FILE_NOT_EXISTS, 'message' => 'file '.$filePath.' not exists', 'data' => array());
         }
+
+        return self::upload_impl($filePath, 0, $bucket, $fileid, $userid, $magicContext, $params);
+    }
+
+    /**
+     * Upload a file via in-memory binary data
+     * The only difference with upload() is that 1st parameter is binary string of an image
+     */
+    public static function upload_binary($fileContent, $bucket, $fileid = '', $userid = 0, $magicContext = '', $params = array()) {
+        return self::upload_impl($fileContent, 1, $bucket, $fileid, $userid, $magicContext, $params);
+    }
+
+    /**
+     * filetype: 0 -- filename, 1 -- in-memory binary file
+     */
+    public static function upload_impl($fileObj, $filetype, $bucket, $fileid, $userid, $magicContext, $params) {
+
+        // $filePath = realpath($filePath);
 
         $expired = time() + self::EXPIRED_SECONDS;
         $url = self::generateResUrl($bucket, $userid, $fileid);
@@ -38,9 +53,14 @@ class ImageV2
             $url .= '?'.$queryStr;
         }
 
-        $data = array(
-            'FileContent' => '@'.$filePath,
-        );
+        $data = array();
+
+        if ($filetype == 0) {
+            $data['FileContent'] = '@'.$fileObj;
+        } else if ($filetype == 1) {
+            $data['FileContent'] = $fileObj;
+        }
+
         if ($magicContext) {
             $data['MagicContext'] = $magicContext;
         }
