@@ -8,10 +8,46 @@ class Auth
     const AUTH_SECRET_ID_KEY_ERROR = -2;
 
     /**
+     * 支持自定义fileid签名函数
+     * 复制、删除操作，fileid必须指定，且expired为0
+     * @param  string $fileid  自定义fileid，无需urlencode
+     * @param  int $expired    过期时间，单次签名请传0并指定fileid
+     * @return userid          用户userid，建议不指定
+     */
+    public static function getAppSignV2($fileid, $expired, $userid = '0') {
+
+        $secretId = Conf::SECRET_ID;
+        $secretKey = Conf::SECRET_KEY;
+        $appid = Conf::APPID;
+        
+        if (empty($secretId) || empty($secretKey) || empty($appid)) {
+            return self::AUTH_SECRET_ID_KEY_ERROR;
+        }
+        
+        $puserid = '';
+        if (!empty($userid)) {
+            if (strlen($userid) > 64) {
+                return self::AUTH_URL_FORMAT_ERROR;
+            }
+            $puserid = $userid;
+        }
+                    
+        $now = time();    
+        $rdm = rand();
+
+        $plainText = 'a='.$appid.'&k='.$secretId.'&e='.$expired.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f='.$fileid;
+        $bin = hash_hmac("SHA1", $plainText, $secretKey, true);
+        $bin = $bin.$plainText;        
+        $sign = base64_encode($bin);        
+        return $sign;
+    }
+
+    /**
      * 签名函数（上传、下载会生成多次有效签名，复制删除资源会生成单次有效签名）
      * @param  string $url     请求url
      * @param  int $expired    过期时间
      * @return string          签名
+     * @deprecated deprecated since v2 support fileid with slash
      */
     public static function appSignV2($url, $expired=0, $options=array()) {
 
@@ -74,6 +110,7 @@ class Auth
      * @param  string $url     请求url
      * @param  int $expired    过期时间
      * @return string          签名
+     * @deprecated deprecated since v2 
      */
     public static function appSign($url, $expired) {
 
@@ -193,6 +230,7 @@ class Auth
      * 老版本（无bucket或者自定义fileId特性）请使用 @see Auth::getInfoFromUrl
      * @param  string $url 请求url
      * @return array       信息数组
+     * @deprecated deprecated since v2 support fileid with slash
      */
     public static function getInfoFromUrlV2($url) {
         $args = parse_url($url);
@@ -265,6 +303,7 @@ class Auth
      * 获取url信息
      * @param  string $url 请求url
      * @return array       信息数组
+     * @deprecated deprecated since v2 support fileid with slash
      */
 	public static function getInfoFromUrl($url) {
         $args = parse_url($url);
