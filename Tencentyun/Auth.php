@@ -10,11 +10,12 @@ class Auth
     /**
      * 支持自定义fileid签名函数
      * 复制、删除操作，fileid必须指定，且expired为0
+     * @param  string $bucket  空间名称
      * @param  string $fileid  自定义fileid，无需urlencode
      * @param  int $expired    过期时间，单次签名请传0并指定fileid
      * @return userid          用户userid，建议不指定
      */
-    public static function getAppSignV2($fileid, $expired, $userid = '0') {
+    public static function getAppSignV2($bucket, $fileid, $expired, $userid = '0') {
 
         $secretId = Conf::SECRET_ID;
         $secretKey = Conf::SECRET_KEY;
@@ -35,7 +36,7 @@ class Auth
         $now = time();    
         $rdm = rand();
 
-        $plainText = 'a='.$appid.'&k='.$secretId.'&e='.$expired.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f='.$fileid;
+        $plainText = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&e='.$expired.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f='.$fileid;
         $bin = hash_hmac("SHA1", $plainText, $secretKey, true);
         $bin = $bin.$plainText;        
         $sign = base64_encode($bin);        

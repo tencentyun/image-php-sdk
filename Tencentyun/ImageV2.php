@@ -45,7 +45,7 @@ class ImageV2
 
         $expired = time() + self::EXPIRED_SECONDS;
         $url = self::generateResUrl($bucket, $userid, $fileid);
-        $sign = Auth::getAppSignV2($fileid, $expired);
+        $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
 
         // add get params to url
         if (isset($params['get']) && is_array($params['get'])) {
@@ -115,7 +115,7 @@ class ImageV2
 
         $expired = time() + self::EXPIRED_SECONDS;
         $url = self::generateResUrl($bucket, $userid, $fileid);
-        $sign = Auth::getAppSignV2($fileid, $expired);
+        $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
 
         $req = array(
             'url' => $url,
@@ -158,7 +158,7 @@ class ImageV2
 
         $expired = 0;
         $url = self::generateResUrl($bucket, $userid, $fileid, 'copy');
-        $sign = Auth::getAppSignV2($fileid, $expired);
+        $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
 
         $req = array(
             'url' => $url,
@@ -198,7 +198,7 @@ class ImageV2
 
         $expired = 0;
         $url = self::generateResUrl($bucket, $userid, $fileid, 'del');
-        $sign = Auth::getAppSignV2($fileid, $expired);
+        $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
 
         $req = array(
             'url' => $url,
