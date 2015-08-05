@@ -56,7 +56,11 @@ class ImageV2
         $data = array();
 
         if ($filetype == 0) {
-            $data['FileContent'] = '@'.$fileObj;
+            if (function_exists('curl_file_create')) {
+                $data['FileContent'] = curl_file_create(realpath($fileObj));
+            } else {
+                $data['FileContent'] = '@'.$fileObj;
+            }
         } else if ($filetype == 1) {
             $data['FileContent'] = $fileObj;
         }

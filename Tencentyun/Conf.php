@@ -3,7 +3,7 @@ namespace Tencentyun;
 
 class Conf
 {
-    const PKG_VERSION = '2.0.0'; 
+    const PKG_VERSION = '2.0.1'; 
 
     const API_IMAGE_END_POINT = 'http://web.image.myqcloud.com/photos/v1/';
 
