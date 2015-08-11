@@ -13,11 +13,11 @@ class Conf
 		
     // 以下部分请您根据在qcloud申请到的项目id和对应的secret id和secret key进行修改
 
-    const APPID = '10000002';
+    const APPID = '10000037';
 
-    const SECRET_ID = 'AKIDL5iZVplWMenB5Zrx47X78mnCM3F5xDbC';
+    const SECRET_ID = 'AKIDpoKBfMK7aYcYNlqxnEtYA1ajAqji2P7T';
 
-    const SECRET_KEY = 'Lraz7n2vNcyW3tiP646xYdfr5KBV4YAv';
+    const SECRET_KEY = 'P4FewbltIpGeAbwgdrG6eghMUVlpmjIe';
 
     // 以上部分请您根据在qcloud申请到的项目id和对应的secret id和secret key进行修改
 

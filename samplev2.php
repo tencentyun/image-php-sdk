@@ -8,9 +8,9 @@ use Tencentyun\ImageV2;
 use Tencentyun\Auth;
 use Tencentyun\Video;
 
-// V2版本 带有空间和自定义文件名的示例
+// V2增强版空间 带有空间和自定义文件名的示例
 // 上传图片
-$bucket = 'test2'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
+$bucket = 'test0706'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
 $fileid = 'sample'.time();  // 自定义文件名
 $uploadRet = ImageV2::upload('/tmp/amazon.jpg', $bucket, $fileid);
 

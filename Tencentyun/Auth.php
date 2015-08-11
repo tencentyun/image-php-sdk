@@ -26,7 +26,7 @@ class Auth
         }
         
         $puserid = '';
-        if (!empty($userid)) {
+        if (isset($userid)) {
             if (strlen($userid) > 64) {
                 return self::AUTH_URL_FORMAT_ERROR;
             }
