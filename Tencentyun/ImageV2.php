@@ -88,6 +88,7 @@ class ImageV2
                     'url' => $ret['data']['url'],
                     'downloadUrl' => $ret['data']['download_url'],
                     'fileid' => $ret['data']['fileid'],
+                    'info' => $ret['data']['info'],
                 );
                 if (array_key_exists('is_fuzzy', $ret['data'])) {
                     $data['isFuzzy'] = $ret['data']['is_fuzzy'];
