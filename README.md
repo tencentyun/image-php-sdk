@@ -14,13 +14,17 @@ php composer.phar require tencentyun/php-sdk
 ## 修改配置
 修改Tencentyun/Conf.php内的appid等信息为您的配置
 
-## V2版本空间和自定义文件名的上传，查询和删除示例
+## V2版本空间和自定义文件名的上传，分片上传、查询和删除示例
 ```php
 require('./include.php');
 
 use Tencentyun\ImageV2;
 use Tencentyun\Auth;
 use Tencentyun\Video;
+
+//分片上传
+$uploadSliceRet = ImageV2::uploadSlice('/tmp/tencent.jpg');
+var_dump('uploadSlice',$uploadSliceRet);
 
 // V2版本 带有空间和自定义文件名的示例
 // 上传图片
@@ -67,6 +71,20 @@ if (0 === $uploadRet['code']) {
 
 ```
 
+## 智能鉴黄示例
+```php
+<?php
+
+require('./include.php');
+
+use Tencentyun\ImageProcess;
+use Tencentyun\Auth;
+
+// 智能鉴黄
+$pornUrl = 'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg';
+$pornRet = ImageProcess::pornDetect($pornUrl);
+var_dump($pornRet);
+```
 
 ## 图片上传并进行优图识别示例1
 ```php

@@ -50,7 +50,7 @@ class ImageV2
      * @param  array   $params       参数数组
      * @return [type]                [description]
      */
-    public static function upload_slice($filePath, $bucket=Conf::BUCKET, $fileid = '', $sliceSize = 0, $session = null,$userid = 0, $magicContext = '',   $params = array()) {  
+    public static function uploadSlice($filePath, $bucket=Conf::BUCKET, $fileid = '', $sliceSize = 0, $session = null,$userid = 0, $magicContext = '',   $params = array()) {  
         $res = self::upload_slice_impl($filePath, $bucket, $fileid, $userid, $magicContext, $sliceSize, $session, $params);      
         if(false === $res)
         {

@@ -22,7 +22,7 @@ $uploadRet = ImageV2::upload('D:/IMAG0449.jpg', $bucket, $fileid);
 var_dump('upload',$uploadRet);
 
 //分片上传
-$uploadSliceRet = ImageV2::upload_slice('D:/ZOE_0104.jpg');
+$uploadSliceRet = ImageV2::uploadSlice('D:/IMAG0007.jpg');
 var_dump('upload_slice',$uploadSliceRet);
 
 
