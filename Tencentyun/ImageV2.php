@@ -4,12 +4,25 @@ namespace Tencentyun;
 
 class ImageV2
 {
+    
+    public static $_messageInfo = array();
     // 30 days
     const EXPIRED_SECONDS = 2592000;
 
     const IMAGE_FILE_NOT_EXISTS = -1;
     const IMAGE_NETWORK_ERROR = -2;
     const IMAGE_PARAMS_ERROR = -3;
+    const COSAPI_ILLEGAL_SLICE_SIZE_ERROR = -4;
+    
+    //10M
+    const MIN_SLICE_FILE_SIZE = 10485;
+    
+    //128K
+    const DEFAULT_SLICE_SIZE = 16384;   //16*1024
+    const MAX_RETRY_TIMES = 3;
+    
+    private static $timeout = 10;
+    public static $_sliceSize = 1048576;
 
     /**
      * 上传文件
@@ -27,6 +40,31 @@ class ImageV2
 
         return self::upload_impl($filePath, 0, $bucket, $fileid, $userid, $magicContext, $params);
     }
+    
+    /**
+     * 上传文件
+     * @param  string  $filePath     本地文件路径
+     * @param  string  $bucket       空间名
+     * @param  integer $userid       用户自定义分类
+     * @param  string  $magicContext 自定义回调参数
+     * @param  array   $params       参数数组
+     * @return [type]                [description]
+     */
+    public static function upload_slice($filePath, $bucket=Conf::BUCKET, $fileid = '', $sliceSize = 0, $session = null,$userid = 0, $magicContext = '',   $params = array()) {  
+        $res = self::upload_slice_impl($filePath, $bucket, $fileid, $userid, $magicContext, $sliceSize, $session, $params);      
+        if(false === $res)
+        {
+            $data = array();
+        }else{
+            $data = $res;
+        }
+
+         return array('code' =>self::$_messageInfo["code"], 
+                         'message' => self::$_messageInfo["message"],
+                         'data' => $data);
+    }
+    
+    
 
     /**
      * Upload a file via in-memory binary data
@@ -59,7 +97,7 @@ class ImageV2
             if (function_exists('curl_file_create')) {
                 $data['FileContent'] = curl_file_create(realpath($fileObj));
             } else {
-                $data['FileContent'] = '@'.$fileObj;
+                $data['FileContent'] = '@'.realpath($fileObj);
             }
         } else if ($filetype == 1) {
             $data['FileContent'] = $fileObj;
@@ -103,6 +141,234 @@ class ImageV2
         } else {
             return array('httpcode' => $info['http_code'], 'code' => self::IMAGE_NETWORK_ERROR, 'message' => 'network error', 'data' => array());
         }
+    }
+    
+    /**
+     * filetype: 0 -- filename, 1 -- in-memory binary file
+     */
+    public static function upload_slice_impl($filePath, $bucket, $fileid, $userid = 0, $magicContext, $sliceSize, $session, $params) {
+         $filePath = realpath($filePath);
+         
+         if (!file_exists($filePath)) {
+             self::setMessageInfo(-1, "file not exixts");                        
+             return false;
+         }
+         
+         $fileSize = filesize($filePath);  
+         
+        $expired = time() + self::EXPIRED_SECONDS;
+        $url = self::generateResUrl($bucket, $userid, $fileid);
+        $sign = Auth::getAppSignV2($bucket, $fileid, $expired);
+        if(false === $sign)
+        {
+            return false;
+        }
+        
+        $sha1 = hash_file('sha1', $filePath);
+
+        $info = self::upload_slice_init(
+               $url, $sign,$sha1,
+                 $fileSize,$sliceSize,$session,$magicContext);
+        if(false === $info)
+        {
+            return false;
+        }
+        
+        if(isset($info['slice_size']))
+        {
+            self::$_sliceSize = $info['slice_size'];
+        }
+        else
+        {
+            self::$_sliceSize = $sliceSize;
+        }
+        
+        $retryTimes = 0;
+        try{
+            while(!isset($info['url']) && isset($info['session']))
+            {   
+                      
+                $newInfo = self::upload_slice_data($filePath, $info, $sign, $url);
+                if(false === $newInfo)
+                { 
+                    $retryTimes++;
+                    if($retryTimes >= self::MAX_RETRY_TIMES)
+                    {
+                        $info = false;
+                        break;
+                    }
+                    continue;
+                }
+               
+                $retryTimes = 0;      
+                $info = $newInfo;
+                if(isset($newInfo['offset']))
+                {
+                    $info['offset'] = $newInfo['offset'] + self::$_sliceSize;
+                }            
+            }
+            
+            $messageInfo = self::getMessageInfo();
+            
+            if(false === $info)
+            {
+                return false;
+            }
+            
+             $data = array(
+                    'url' => $info['url'],
+                    'downloadUrl' => $info['download_url'],
+                    'fileid' => $info['fileid'],
+                );
+              
+             self::setMessageInfo(0, "upload slice success");
+        }
+        catch(Exception  $e){
+            self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
+            return false;
+        }
+    
+        return $data;
+        
+    }
+    
+    private static function upload_slice_init($url, $sign,$sha1,$fileSize,$sliceSize,$session,$magicContext)
+     {   
+        $data = array(
+                'op' => 'upload_slice',
+                'filesize' => $fileSize,
+                'sha' => $sha1,
+        );
+        
+        isset($magicContext) &&
+        $data['magicContext'] = $magicContext;
+        isset($session) &&
+        $data['session'] = $session;
+    
+        if ($sliceSize > 0) {
+                $data['slice_size'] = $sliceSize;
+            }
+             else {
+                $data['slice_size'] = self::DEFAULT_SLICE_SIZE;
+            }
+    
+        $req = array(
+                'url' => $url,
+                'method' => 'post',
+                'timeout' => self::$timeout,
+                'data' => $data,
+                'header' => array(
+                        'Authorization:'.$sign,
+                ),
+        );
+        
+         try{
+            $rsp = Http::send($req);       
+            $info = Http::info();
+            $ret = json_decode($rsp, true);    
+            if(!$ret || (200 != $info['http_code'])) 
+            {
+                self::setMessageInfo($ret['code'], 'network error');
+                return false;
+            }
+            
+            if(0 !== $ret['code'])
+            {
+                self::setMessageInfo($ret['code'], $ret['message']);
+                return false;
+            }
+                    
+            $info = $ret['data']; 
+         }
+         catch(Exception  $e){
+             self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
+             return false;
+         }    
+           
+        return $info;
+    }
+    
+    private static function upload_slice_data($filePath,$info, $sign,$url){       
+        // 设置分割标识
+        srand((double)microtime()*1000000);
+        $boundary = '---------------------------'.substr(md5(rand(0,32000)),0,10);
+        
+        $data = self::generateSliceData($filePath,$info,$boundary);
+        if(false === $data)
+        {
+            return false;
+        }
+        
+        $req = array(
+                'url' => $url,
+                'method' => 'post',
+                'timeout' => self::$timeout,
+                'data' => $data,
+                'header' => array(
+                        'Authorization:'.$sign,
+                        'Content-Type: multipart/form-data; boundary=' . $boundary,
+                ),
+        );
+
+        try{
+            $rsp = Http::send($req);       
+            $info = Http::info(); 
+            $ret = json_decode($rsp, true);
+            
+            if(!$ret || (200 != $info['http_code'])) 
+            {
+                self::setMessageInfo($ret['code'], 'network error');
+                return false;
+            }
+            
+            if(0 !== $ret['code'])
+            {
+                self::setMessageInfo($ret['code'], $ret['message']);
+                return false;
+            }
+    
+            $info = $ret['data'];
+        }
+        catch(Exception  $e){
+            self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
+            return false;
+        }
+
+        return $info;
+    }
+    
+    private static function generateSliceData($filePath, $info,$boundary) {
+        try{   
+            $filecontent = file_get_contents(
+                    $filePath, false, null,$info['offset'],self::$_sliceSize); 
+                 
+            if(false === $filecontent ){
+                self::setMessageInfo(-1, 'file content get error');
+                return false;
+            }
+                      
+            $formdata = '';
+        
+            $formdata .= '--' . $boundary . "\r\n";
+            $formdata .= "content-disposition: form-data; name=\"op\"\r\n\r\nupload_slice\r\n";
+        
+            $formdata .= '--' . $boundary . "\r\n";
+            $formdata .= "content-disposition: form-data; name=\"offset\"\r\n\r\n" . $info['offset']. "\r\n";
+        
+            $formdata .= '--' . $boundary . "\r\n";
+            $formdata .= "content-disposition: form-data; name=\"session\"\r\n\r\n" . $info['session'] . "\r\n";
+        
+            $formdata .= '--' . $boundary . "\r\n";
+            $formdata .= "content-disposition: form-data; name=\"fileContent\"; filename=\"" . basename($filePath) . "\"\r\n";
+            $formdata .= "content-type: application/octet-stream\r\n\r\n";
+        
+            $data = $formdata . $filecontent . "\r\n--" . $boundary . "--\r\n";
+        }catch(Exception  $e){
+            self::setMessageInfo(-1, "generate Slice Data exception, e=".$e->getMessage());
+            return false;
+        }
+        
+        return $data;
     }
 
     /**
@@ -241,9 +507,15 @@ class ImageV2
         }
     }
 
+    public static function setMessageInfo($code, $message) {
+        self::$_messageInfo["code"] = $code;
+        self::$_messageInfo["message"] = $message;
+    }
+    
+    public static function getMessageInfo() {
+        return self::$_messageInfo;
+    }
 }
-
-
 
 //end of script
 

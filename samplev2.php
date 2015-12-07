@@ -7,14 +7,25 @@ require('./include.php');
 use Tencentyun\ImageV2;
 use Tencentyun\Auth;
 use Tencentyun\Video;
+use Tencentyun\ImageProcess;
+
+//智能鉴黄
+$pornUrl = 'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg';
+$pornRet = ImageProcess::pornDetect($pornUrl);
+var_dump($pornRet);
 
 // V2增强版空间 带有空间和自定义文件名的示例
 // 上传图片
-$bucket = 'test0706'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
+$bucket = 'zlktest'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
 $fileid = 'sample'.time();  // 自定义文件名
-$uploadRet = ImageV2::upload('/tmp/amazon.jpg', $bucket, $fileid);
-
+$uploadRet = ImageV2::upload('D:/IMAG0449.jpg', $bucket, $fileid);
 var_dump('upload',$uploadRet);
+
+//分片上传
+$uploadSliceRet = ImageV2::upload_slice('D:/ZOE_0104.jpg');
+var_dump('upload_slice',$uploadSliceRet);
+
+
 
 if (0 === $uploadRet['code']) {
     $fileid = $uploadRet['data']['fileid'];
@@ -47,8 +58,7 @@ if (0 === $uploadRet['code']) {
 
     //$delRet = ImageV2::del($bucket, $fileid);
     //var_dump($delRet);
-} else {
-    var_dump($uploadRet);
 }
+
 
 //end of script

@@ -22,13 +22,15 @@ class Auth
         $appid = Conf::APPID;
         
         if (empty($secretId) || empty($secretKey) || empty($appid)) {
-            return self::AUTH_SECRET_ID_KEY_ERROR;
+            ImageV2::setMessageInfo(-1,"sign error");
+            return false;
         }
         
         $puserid = '';
         if (isset($userid)) {
             if (strlen($userid) > 64) {
-                return self::AUTH_URL_FORMAT_ERROR;
+                ImageV2::setMessageInfo(-1,"sign error");
+                return false;
             }
             $puserid = $userid;
         }
@@ -44,65 +46,24 @@ class Auth
     }
 
     /**
-     * 签名函数（上传、下载会生成多次有效签名，复制删除资源会生成单次有效签名）
-     * @param  string $url     请求url
-     * @param  int $expired    过期时间
-     * @return string          签名
-     * @deprecated deprecated since v2 support fileid with slash
+     * 智能鉴黄签名函数
+     * @param  string $url     请求的鉴黄url
      */
-    public static function appSignV2($url, $expired=0, $options=array()) {
-
+    public static function getPornDetectSign($url) {
         $secretId = Conf::SECRET_ID;
         $secretKey = Conf::SECRET_KEY;
-
         if (empty($secretId) || empty($secretKey)) {
-            return self::AUTH_SECRET_ID_KEY_ERROR;
-        }
-
-        $urlInfo = self::getInfoFromUrlV2($url);
-        if (empty($urlInfo)) {
-            return self::AUTH_URL_FORMAT_ERROR;
-        }
-
-        $cate   = isset($urlInfo['cate']) ? $urlInfo['cate'] : '';
-        $ver    = isset($urlInfo['ver']) ? $urlInfo['ver'] : '';
-        $appid  = $urlInfo['appid'];
-        $bucket  = $urlInfo['bucket'];
-        $userid = $urlInfo['userid'];
-        $oper   = isset($urlInfo['oper']) ? $urlInfo['oper'] : '';
-        $fileid = isset($urlInfo['fileid']) ? $urlInfo['fileid'] : '';
-        $style = isset($urlInfo['style']) ? $urlInfo['style'] : '';
-
-        $onceOpers = array('del', 'copy');
-        if (($oper && in_array($oper, $onceOpers))) {
-            $expired = 0;
-        }
-
-        if (!$oper && $fileid && !$style) {
-            // 自定义fileid上传
-            $fileid = '';
+            return false;
         }
         
-        $puserid = '';
-        if (!empty($userid)) {
-            if (strlen($userid) > 64) {
-                return self::AUTH_URL_FORMAT_ERROR;
-            }
-            $puserid = $userid;
-        }
-                    
-        $now = time();    
-        $rdm = rand();
-
-        $plainText = 'a='.$appid.'&k='.$secretId.'&e='.$expired.'&t='.$now.'&r='.$rdm.'&u='.$puserid.'&f='.$fileid;
-
-        $bin = hash_hmac("SHA1", $plainText, $secretKey, true);
-
-        $bin = $bin.$plainText;        
-
-        $sign = base64_encode($bin);        
+        $appid = Conf::APPID;
+        $bucket = Conf::BUCKET;     
+        $expired = time() + 10;
+        $current = time();
+        $srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired.'&l='.$url;
+        $signStr = base64_encode(hash_hmac('SHA1', $srcStr, $secretKey, true).$srcStr);   
         
-        return $sign;
+        return $signStr;
     }
 
     /**

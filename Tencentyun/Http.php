@@ -66,6 +66,7 @@ class Http
         $ret = curl_exec($curlHandle);
         self::$_httpInfo = curl_getinfo($curlHandle);
         curl_close($curlHandle);
+
         return $ret;
     }
 
