@@ -17,7 +17,7 @@ class ImageV2
     //10M
     const MIN_SLICE_FILE_SIZE = 10485;
     
-    //128K
+    //16K
     const DEFAULT_SLICE_SIZE = 16384;   //16*1024
     const MAX_RETRY_TIMES = 3;
     
@@ -50,7 +50,7 @@ class ImageV2
      * @param  array   $params       参数数组
      * @return [type]                [description]
      */
-    public static function uploadSlice($filePath, $bucket=Conf::BUCKET, $fileid = '', $sliceSize = 0, $session = null,$userid = 0, $magicContext = '',   $params = array()) {  
+    public static function uploadSlice($filePath, $bucket=Conf::BUCKET, $fileid = '', $sliceSize = 0, $session = null,$userid = 0, $magicContext = null,   $params = array()) {  
         $res = self::upload_slice_impl($filePath, $bucket, $fileid, $userid, $magicContext, $sliceSize, $session, $params);      
         if(false === $res)
         {
@@ -184,50 +184,45 @@ class ImageV2
         }
         
         $retryTimes = 0;
-        try{
-            while(!isset($info['url']) && isset($info['session']))
-            {   
-                      
-                $newInfo = self::upload_slice_data($filePath, $info, $sign, $url);
-                if(false === $newInfo)
-                { 
-                    $retryTimes++;
-                    if($retryTimes >= self::MAX_RETRY_TIMES)
-                    {
-                        $info = false;
-                        break;
-                    }
-                    continue;
-                }
-               
-                $retryTimes = 0;      
-                $info = $newInfo;
-                if(isset($newInfo['offset']))
+        $newInfo = array();
+        while(!isset($info['url']) && isset($info['session']))
+        {  
+            $newInfo = self::upload_slice_data($filePath, $info, $sign, $url);
+            if(false === $newInfo)
+            { 
+                $retryTimes++;
+                if($retryTimes >= self::MAX_RETRY_TIMES)
                 {
-                    $info['offset'] = $newInfo['offset'] + self::$_sliceSize;
-                }            
-            }
-            
-            $messageInfo = self::getMessageInfo();
-            
-            if(false === $info)
+                    $info = false;
+                    break;
+                }
+                continue;
+            }                                  
+
+            $retryTimes = 0;
+
+            $info = $newInfo;
+            if(isset($newInfo['offset']))
             {
-                return false;
-            }
-            
-             $data = array(
-                    'url' => $info['url'],
-                    'downloadUrl' => $info['download_url'],
-                    'fileid' => $info['fileid'],
-                );
-              
-             self::setMessageInfo(0, "upload slice success");
+                $info['offset'] = $newInfo['offset'] + self::$_sliceSize;
+            }                      
         }
-        catch(Exception  $e){
-            self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
+        
+        $messageInfo = self::getMessageInfo();
+        
+        if(false === $info)
+        {
             return false;
         }
-    
+        
+        $data = array(
+                'url' => $info['url'],
+                'downloadUrl' => $info['download_url'],
+                'fileid' => $info['fileid'],
+            );
+          
+        self::setMessageInfo(0, "upload slice success");
+
         return $data;
         
     }
@@ -240,11 +235,13 @@ class ImageV2
                 'sha' => $sha1,
         );
         
-        isset($magicContext) &&
-        $data['magicContext'] = $magicContext;
-        isset($session) &&
-        $data['session'] = $session;
-    
+        if($magicContext) {
+            $data['magicContext'] = $magicContext;
+        }
+        if($session){
+            $data['session'] = $session;
+        }
+        
         if ($sliceSize > 0) {
                 $data['slice_size'] = $sliceSize;
             }
@@ -258,32 +255,27 @@ class ImageV2
                 'timeout' => self::$timeout,
                 'data' => $data,
                 'header' => array(
+                        'Connection:Keep-Alive',
                         'Authorization:'.$sign,
                 ),
         );
+
+        $rsp = Http::send($req);       
+        $info = Http::info();
+        $ret = json_decode($rsp, true);    
+        if(!$ret ) 
+        {
+            self::setMessageInfo($ret['code'], 'network error');
+            return false;
+        }
         
-         try{
-            $rsp = Http::send($req);       
-            $info = Http::info();
-            $ret = json_decode($rsp, true);    
-            if(!$ret || (200 != $info['http_code'])) 
-            {
-                self::setMessageInfo($ret['code'], 'network error');
-                return false;
-            }
-            
-            if(0 !== $ret['code'])
-            {
-                self::setMessageInfo($ret['code'], $ret['message']);
-                return false;
-            }
-                    
-            $info = $ret['data']; 
-         }
-         catch(Exception  $e){
-             self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
-             return false;
-         }    
+        if(0 !== $ret['code'] || (200 != $info['http_code']))
+        {
+            self::setMessageInfo($ret['code'], $ret['message']);
+            return false;
+        }
+                
+        $info = $ret['data']; 
            
         return $info;
     }
@@ -292,7 +284,6 @@ class ImageV2
         // 设置分割标识
         srand((double)microtime()*1000000);
         $boundary = '---------------------------'.substr(md5(rand(0,32000)),0,10);
-        
         $data = self::generateSliceData($filePath,$info,$boundary);
         if(false === $data)
         {
@@ -305,69 +296,64 @@ class ImageV2
                 'timeout' => self::$timeout,
                 'data' => $data,
                 'header' => array(
+                        'accept:*/*',
+                        'Connection:Keep-Alive',
+                        'user-agent:qcloud-php-sdk',
+                        'Host:web.image.myqcloud.com',
                         'Authorization:'.$sign,
-                        'Content-Type: multipart/form-data; boundary=' . $boundary,
+                        'Expect: ',  
+                        'Method:POST',
+                        'Content-Type: multipart/form-data; boundary=' . $boundary,             
                 ),
         );
 
-        try{
-            $rsp = Http::send($req);       
-            $info = Http::info(); 
-            $ret = json_decode($rsp, true);
-            
-            if(!$ret || (200 != $info['http_code'])) 
-            {
-                self::setMessageInfo($ret['code'], 'network error');
-                return false;
-            }
-            
-            if(0 !== $ret['code'])
-            {
-                self::setMessageInfo($ret['code'], $ret['message']);
-                return false;
-            }
-    
-            $info = $ret['data'];
-        }
-        catch(Exception  $e){
-            self::setMessageInfo(-1, "url exception, e=".$e->getMessage());
+        $rsp = Http::send($req);       
+        $info = Http::info(); 
+        $ret = json_decode($rsp, true);
+        
+        if(!$ret || (200 != $info['http_code'])) 
+        {
+            self::setMessageInfo($ret['code'], 'network error');
             return false;
         }
+        
+        if(0 !== $ret['code'])
+        {
+            self::setMessageInfo($ret['code'], $ret['message']);
+            return false;
+        }
+
+        $info = $ret['data'];
 
         return $info;
     }
     
-    private static function generateSliceData($filePath, $info,$boundary) {
-        try{   
-            $filecontent = file_get_contents(
-                    $filePath, false, null,$info['offset'],self::$_sliceSize); 
-                 
-            if(false === $filecontent ){
-                self::setMessageInfo(-1, 'file content get error');
-                return false;
-            }
-                      
-            $formdata = '';
-        
-            $formdata .= '--' . $boundary . "\r\n";
-            $formdata .= "content-disposition: form-data; name=\"op\"\r\n\r\nupload_slice\r\n";
-        
-            $formdata .= '--' . $boundary . "\r\n";
-            $formdata .= "content-disposition: form-data; name=\"offset\"\r\n\r\n" . $info['offset']. "\r\n";
-        
-            $formdata .= '--' . $boundary . "\r\n";
-            $formdata .= "content-disposition: form-data; name=\"session\"\r\n\r\n" . $info['session'] . "\r\n";
-        
-            $formdata .= '--' . $boundary . "\r\n";
-            $formdata .= "content-disposition: form-data; name=\"fileContent\"; filename=\"" . basename($filePath) . "\"\r\n";
-            $formdata .= "content-type: application/octet-stream\r\n\r\n";
-        
-            $data = $formdata . $filecontent . "\r\n--" . $boundary . "--\r\n";
-        }catch(Exception  $e){
-            self::setMessageInfo(-1, "generate Slice Data exception, e=".$e->getMessage());
+    private static function generateSliceData($filePath, $info,$boundary) {  
+        $filecontent = file_get_contents(
+                $filePath, false, null,$info['offset'],self::$_sliceSize); 
+             
+        if(false === $filecontent ){
+            self::setMessageInfo(-1, 'file content get error');
             return false;
         }
-        
+                  
+        $formdata = '';
+    
+        $formdata .= '--' . $boundary . "\r\n";
+        $formdata .= "content-disposition: form-data; name=\"op\"\r\n\r\nupload_slice\r\n";
+    
+        $formdata .= '--' . $boundary . "\r\n";
+        $formdata .= "content-disposition: form-data; name=\"offset\"\r\n\r\n" . $info['offset']. "\r\n";
+    
+        $formdata .= '--' . $boundary . "\r\n";
+        $formdata .= "content-disposition: form-data; name=\"session\"\r\n\r\n" . $info['session'] . "\r\n";
+    
+        $formdata .= '--' . $boundary . "\r\n";
+        $formdata .= "content-disposition: form-data; name=\"fileContent\"; filename=\"" . basename($filePath) . "\"\r\n";
+        $formdata .= "content-type: application/octet-stream\r\n\r\n";
+    
+        $data = $formdata . $filecontent . "\r\n--" . $boundary . "--\r\n";
+
         return $data;
     }
 
