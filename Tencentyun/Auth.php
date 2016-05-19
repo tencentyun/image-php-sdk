@@ -60,7 +60,8 @@ class Auth
         $bucket = Conf::BUCKET;     
         $expired = time() + 10;
         $current = time();
-        $srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired.'&l='.$url;
+        
+        $srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired.'&l='.urlencode($url);
         $signStr = base64_encode(hash_hmac('SHA1', $srcStr, $secretKey, true).$srcStr);   
         
         return $signStr;
