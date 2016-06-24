@@ -1,4 +1,4 @@
-# tencentyun-image-php
+# tencentyun/image-php-sdk
 腾讯云 [万象优图（Cloud Image）](http://app.qcloud.com/image.html) SDK for PHP
 
 ## 安装（使用composer获取或者直接下载源码集成）
