@@ -1,5 +1,5 @@
-# tencentyun-image-php
-php sdk for [腾讯云万象图片服务](http://app.qcloud.com/image.html)
+# tencentyun/image-php-sdk
+腾讯云 [万象优图（Cloud Image）](https://www.qcloud.com/product/ci.html) SDK for PHP
 
 ## 安装（使用composer获取或者直接下载源码集成）
 
@@ -83,6 +83,23 @@ use Tencentyun\Auth;
 // 智能鉴黄
 $pornUrl = 'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg';
 $pornRet = ImageProcess::pornDetect($pornUrl);
+var_dump($pornRet);
+
+//智能鉴黄，单个或多个图片Url
+$pornUrl = array(
+        'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg',
+        'http://c.hiphotos.baidu.com/image/h%3D200/sign=7b991b465eee3d6d3dc680cb73176d41/96dda144ad3459829813ed730bf431adcaef84b1.jpg',
+    );
+$pornRet = ImageProcess::pornDetectUrl($pornUrl);
+var_dump($pornRet);
+
+//智能鉴黄，单个或多个图片File
+$pornFile = array(
+        'D:\porn\test1.jpg',
+        '..\..\..\..\porn\test2.jpg',
+        '..\..\..\..\porn\测试.png',
+    );
+$pornRet = ImageProcess::pornDetectFile($pornFile);
 var_dump($pornRet);
 ```
 

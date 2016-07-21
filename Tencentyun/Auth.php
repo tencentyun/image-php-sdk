@@ -49,7 +49,7 @@ class Auth
      * 智能鉴黄签名函数
      * @param  string $url     请求的鉴黄url
      */
-    public static function getPornDetectSign($url) {
+    public static function getPornDetectSign($url = null) {
         $secretId = Conf::SECRET_ID;
         $secretKey = Conf::SECRET_KEY;
         if (empty($secretId) || empty($secretKey)) {
@@ -58,10 +58,11 @@ class Auth
         
         $appid = Conf::APPID;
         $bucket = Conf::BUCKET;     
-        $expired = time() + 10;
+        $expired = time() + 1000;
         $current = time();
         
-        $srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired.'&l='.urlencode($url);
+        #$srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired.'&l='.urlencode($url);
+        $srcStr = 'a='.$appid.'&b='.$bucket.'&k='.$secretId.'&t='.$current.'&e='.$expired;
         $signStr = base64_encode(hash_hmac('SHA1', $srcStr, $secretKey, true).$srcStr);   
         
         return $signStr;

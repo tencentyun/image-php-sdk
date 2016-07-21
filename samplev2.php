@@ -9,9 +9,26 @@ use Tencentyun\Auth;
 use Tencentyun\Video;
 use Tencentyun\ImageProcess;
 
-//智能鉴黄
+//智能鉴黄，单个Url
 $pornUrl = 'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg';
 $pornRet = ImageProcess::pornDetect($pornUrl);
+var_dump($pornRet);
+
+//智能鉴黄，单个或多个图片Url
+$pornUrl = array(
+        'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg',
+        'http://c.hiphotos.baidu.com/image/h%3D200/sign=7b991b465eee3d6d3dc680cb73176d41/96dda144ad3459829813ed730bf431adcaef84b1.jpg',
+    );
+$pornRet = ImageProcess::pornDetectUrl($pornUrl);
+var_dump($pornRet);
+
+//智能鉴黄，单个或多个图片File
+$pornFile = array(
+        'D:\porn\test1.jpg',
+        '..\..\..\..\porn\test2.jpg',
+        '..\..\..\..\porn\测试.png',
+    );
+$pornRet = ImageProcess::pornDetectFile($pornFile);
 var_dump($pornRet);
 
 // V2增强版空间 带有空间和自定义文件名的示例

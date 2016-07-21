@@ -15,15 +15,13 @@ class Conf
 		
     // 以下部分请您根据在qcloud申请到的项目id和对应的secret id和secret key进行修改
 
-    const APPID = 10010932;
+    const APPID = 111;
 
-    const SECRET_ID = 'AKIDja50jDrIkjHHrxCiWbKZJpb9RKlOa3Jg';
+    const SECRET_ID = 'SECRET_ID';
 
-    const SECRET_KEY = 'RXuZ1aVJitf0ZShDIL4jI2uZxLL6QVcp';
+    const SECRET_KEY = 'SECRET_KEY';
     
-    const BUCKET = 'zlktest';
-
-    
+    const BUCKET = 'BUCKET';
     // 以上部分请您根据在qcloud申请到的项目id和对应的secret id和secret key进行修改
 
     public static function getUA() {

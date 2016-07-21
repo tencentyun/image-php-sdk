@@ -62,6 +62,7 @@ class Http
         $header[] = 'Method:'.$method;
         $header[] = 'User-Agent:'.Conf::getUA();
         isset($rq['host']) && $header[] = 'Host:'.$rq['host'];
+        //curl_setopt(self::$_curlHandler, CURLOPT_PROXY, '127.0.0.1:8888');
         curl_setopt(self::$_curlHandler, CURLOPT_HTTPHEADER, $header);
         curl_setopt(self::$_curlHandler, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt(self::$_curlHandler, CURLOPT_CUSTOMREQUEST, $method);
