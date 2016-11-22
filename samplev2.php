@@ -8,6 +8,7 @@ use Tencentyun\ImageV2;
 use Tencentyun\Auth;
 use Tencentyun\Video;
 use Tencentyun\ImageProcess;
+use Tencentyun\Conf;
 
 //智能鉴黄，单个Url
 $pornUrl = 'http://b.hiphotos.baidu.com/image/pic/item/8ad4b31c8701a18b1efd50a89a2f07082938fec7.jpg';
@@ -33,7 +34,7 @@ var_dump($pornRet);
 
 // V2增强版空间 带有空间和自定义文件名的示例
 // 上传图片
-$bucket = 'zlktest'; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
+$bucket = Conf::BUCKET; // 自定义空间名称，在http://console.qcloud.com/image/bucket创建
 $fileid = 'sample'.time();  // 自定义文件名
 $uploadRet = ImageV2::upload('D:/IMAG0449.jpg', $bucket, $fileid);
 var_dump('upload',$uploadRet);

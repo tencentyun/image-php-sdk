@@ -15,7 +15,7 @@ class Conf
 		
     // 以下部分请您根据在qcloud申请到的项目id和对应的secret id和secret key进行修改
 
-    const APPID = 111;
+    const APPID = 'APPID';
 
     const SECRET_ID = 'SECRET_ID';
 
