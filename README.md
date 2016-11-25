@@ -1,18 +1,22 @@
 # tencentyun/image-php-sdk
 腾讯云 [万象优图（Cloud Image）](https://www.qcloud.com/product/ci.html) SDK for PHP
 
-## 安装（使用composer获取或者直接下载源码集成）
+## 使用 
 
-### 使用composer获取
-php composer.phar require tencentyun/php-sdk
-调用请参考示例1
+### 安装
+使用 composer 获取或者直接下载源码集成
 
-### 直接下载源码集成
+#### 使用composer获取
+    php composer.phar require tencentyun/php-sdk
+
+调用请参考 示例1 (samplev1.php)
+
+#### 直接下载源码集成
 从github下载源码装入到您的程序中，并加载include.php
-调用请参考示例2
+调用请参考示例2(samplev2.php)
 
-## 修改配置
-修改Tencentyun/Conf.php内的appid等信息为您的配置
+### 修改配置
+修改 Tencentyun/Conf.php 内的 appid 等信息为您的配置
 
 ## V2版本空间和自定义文件名的上传，分片上传、查询和删除示例
 ```php
