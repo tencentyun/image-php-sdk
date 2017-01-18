@@ -66,7 +66,7 @@ class Http
         curl_setopt(self::$_curlHandler, CURLOPT_HTTPHEADER, $header);
         curl_setopt(self::$_curlHandler, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt(self::$_curlHandler, CURLOPT_CUSTOMREQUEST, $method);
-        if (defined('CURLOPT_SAFE_UPLOAD')) {
+        if (defined('CURLOPT_SAFE_UPLOAD') && version_compare(PHP_VERSION, '7.0.0', '<')) {
             curl_setopt(self::$_curlHandler, CURLOPT_SAFE_UPLOAD, false);
         }
 
